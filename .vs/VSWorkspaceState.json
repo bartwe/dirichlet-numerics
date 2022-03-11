@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Dirichlet.Numerics"
   ],
-  "SelectedNode": "\\DirichletNumerics.sln",
+  "SelectedNode": "\\Dirichlet.Numerics.sln",
   "PreviewInSolutionExplorer": false
 }

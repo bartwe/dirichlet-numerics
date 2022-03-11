@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 
 namespace Dirichlet.Numerics;
 
-public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquatable<UInt128>
+public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquatable<UInt128>, IUnsignedNumber<UInt128>
 {
     private struct UInt256
     {
@@ -27,7 +28,6 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
 
         public static implicit operator BigInteger(UInt256 a) => (BigInteger)a.s3 << 192 | (BigInteger)a.s2 << 128 | (BigInteger)a.s1 << 64 | a.s0;
 
-        public override string ToString() => ((BigInteger)this).ToString();
     }
 
 #pragma warning disable IDE0032 // Use auto property
@@ -37,29 +37,69 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
 
     public static UInt128 MinValue => Zero;
     public static UInt128 MaxValue { get; } = ~(UInt128)0;
+    public static UInt128 AdditiveIdentity { get; } = (UInt128)0;
+    public static UInt128 MultiplicativeIdentity { get; } = (UInt128)1;
     public static UInt128 Zero { get; } = (UInt128)0;
     public static UInt128 One { get; } = (UInt128)1;
 
-    public static UInt128 Parse(string value)
-    {
-        if (!TryParse(value, out UInt128 c))
-            throw new FormatException();
-        return c;
-    }
+    private uint R0 => (uint)s0;
+    private uint R1 => (uint)(s0 >> 32);
+    private uint R2 => (uint)s1;
+    private uint R3 => (uint)(s1 >> 32);
 
-    public static bool TryParse(string value, out UInt128 result) => TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+    public ulong S0 => s0;
+    public ulong S1 => s1;
 
-    public static bool TryParse(string value, NumberStyles style, IFormatProvider provider, out UInt128 result)
+    public bool IsZero => (s0 | s1) == 0;
+    public bool IsOne => s1 == 0 && s0 == 1;
+    public bool IsPowerOfTwo => (this & (this - 1)).IsZero;
+    public bool IsEven => (s0 & 1) == 0;
+    public int Sign => IsZero ? 0 : 1;
+
+    static UInt128 INumber<UInt128>.Sign(UInt128 value) => value.IsZero ? Zero : One;
+
+    public override string ToString() => ((BigInteger)this).ToString();
+    public string ToString(string format) => ((BigInteger)this).ToString(format);
+    public string ToString(IFormatProvider provider) => ToString(null, provider);
+    public string ToString(string? format, IFormatProvider? provider) => ((BigInteger)this).ToString(format, provider);
+    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => ((BigInteger)this).TryFormat(destination, out charsWritten, format, provider);
+
+
+    #region Parsing
+    const NumberStyles StyleUnsignedInteger = NumberStyles.Integer & ~NumberStyles.AllowLeadingSign;
+    public static UInt128 Parse(string s) => TryParse(s, StyleUnsignedInteger, NumberFormatInfo.CurrentInfo, out UInt128 c) ? c : throw new FormatException();
+    public static UInt128 Parse(string s, IFormatProvider? provider) => TryParse(s, StyleUnsignedInteger, provider, out UInt128 c) ? c : throw new FormatException();
+    public static UInt128 Parse(string s, NumberStyles style, IFormatProvider? provider) => TryParse(s, style, provider, out UInt128 c) ? c : throw new FormatException();
+    public static UInt128 Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => TryParse(s, StyleUnsignedInteger, provider, out UInt128 c) ? c : throw new FormatException();
+    public static UInt128 Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) => TryParse(s, style, provider, out UInt128 c) ? c : throw new FormatException();
+
+    public static bool TryParse(string s, out UInt128 result) => TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out UInt128 result) => TryParse(s, StyleUnsignedInteger, provider, out result);
+    public static bool TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, out UInt128 result)
     {
-        if (!BigInteger.TryParse(value, style, provider, out BigInteger a))
+        if (BigInteger.TryParse(s, style, provider, out BigInteger a))
         {
-            result = Zero;
-            return false;
+            Create(out result, a);
+            return true;
         }
-        Create(out result, a);
-        return true;
+        result = Zero;
+        return false;
     }
+    public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out UInt128 result) => TryParse(s, StyleUnsignedInteger, provider, out result);
+    public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out UInt128 result)
+    {
+        if (BigInteger.TryParse(s, style, provider, out BigInteger a))
+        {
+            Create(out result, a);
+            return true;
+        }
+        result = Zero;
+        return false;
+    }
+    #endregion Parsing
 
+
+    #region Creation and Casting
     public UInt128(long value) => Create(out this, value);
 
     public UInt128(ulong value) => Create(out this, value);
@@ -75,25 +115,21 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         c.s0 = (ulong)r1 << 32 | r0;
         c.s1 = (ulong)r3 << 32 | r2;
     }
-
     public static void Create(out UInt128 c, ulong s0, ulong s1)
     {
         c.s0 = s0;
         c.s1 = s1;
     }
-
     public static void Create(out UInt128 c, long a)
     {
         c.s0 = (ulong)a;
         c.s1 = a < 0 ? ulong.MaxValue : 0;
     }
-
     public static void Create(out UInt128 c, ulong a)
     {
         c.s0 = a;
         c.s1 = 0;
     }
-
     public static void Create(out UInt128 c, decimal a)
     {
         int[] bits = decimal.GetBits(decimal.Truncate(a));
@@ -137,27 +173,47 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             Negate(ref c);
     }
 
-    private uint R0 => (uint)s0;
-    private uint R1 => (uint)(s0 >> 32);
-    private uint R2 => (uint)s1;
-    private uint R3 => (uint)(s1 >> 32);
+    public static UInt128 Create<TOther>(TOther value) where TOther : INumber<TOther>
+    {
+        if (TryCreate(value, out UInt128 result))
+            return result;
+        throw new NotSupportedException();
+    }
 
-    public ulong S0 => s0;
-    public ulong S1 => s1;
 
-    public bool IsZero => (s0 | s1) == 0;
-    public bool IsOne => s1 == 0 && s0 == 1;
-    public bool IsPowerOfTwo => (this & (this - 1)).IsZero;
-    public bool IsEven => (s0 & 1) == 0;
-    public int Sign => IsZero ? 0 : 1;
+    public static bool TryCreate<TOther>(TOther value, out UInt128 result) where TOther : INumber<TOther>
+    {
+        bool success = true;
+        UInt128 fail()
+        {
+            success = false;
+            return default;
+        }
+        result = value switch
+        {
+            long a => new(a),
+            ulong a => new(a),
+            double a => new(a),
+            decimal a => new(a),
+            BigInteger a => new(a),
+            Int128 a => new(a),
+            float a => new(a),
+            int a => new(a),
+            uint a => new(a),
+            short a => new(a),
+            ushort a => new(a),
+            char a => new(a),
+            byte a => new(a),
+            _ => fail(),
+        };
+        return success;
+    }
 
-    public override string ToString() => ((BigInteger)this).ToString();
+    //TODO
+    public static UInt128 CreateSaturating<TOther>(TOther value) where TOther : INumber<TOther> => throw new NotImplementedException();
+    //TODO
+    public static UInt128 CreateTruncating<TOther>(TOther value) where TOther : INumber<TOther> => throw new NotImplementedException();
 
-    public string ToString(string format) => ((BigInteger)this).ToString(format);
-
-    public string ToString(IFormatProvider provider) => ToString(null, provider);
-
-    public string ToString(string? format, IFormatProvider? provider) => ((BigInteger)this).ToString(format, provider);
 
     public static explicit operator UInt128(double a)
     {
@@ -260,6 +316,8 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
     }
 
     public static implicit operator BigInteger(UInt128 a) => a.s1 == 0 ? (BigInteger)a.s0 : (BigInteger)a.s1 << 64 | a.s0;
+    #endregion Creation and Casting
+
 
     public static UInt128 operator <<(UInt128 a, int b)
     {
@@ -354,6 +412,12 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
     }
 
     public static UInt128 operator +(UInt128 a) => a;
+
+    public static UInt128 operator -(UInt128 a)
+    {
+        Negate(ref a);
+        return a;
+    }
 
     public static UInt128 operator *(UInt128 a, uint b)
     {
@@ -1641,6 +1705,9 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
 
     public static UInt128 Max(UInt128 a, UInt128 b) => LessThan(ref b, ref a) ? a : b;
 
+    public static UInt128 Clamp(UInt128 a, UInt128 min, UInt128 max) => LessThan(ref a, ref min) ? min : (LessThan(ref max, ref a) ? max : a);
+
+
     public static double Log(UInt128 a) => Log(a, Math.E);
 
     public static double Log10(UInt128 a) => Log(a, 10);
@@ -1679,9 +1746,16 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
 
     public static UInt128 DivRem(UInt128 a, UInt128 b, out UInt128 remainder)
     {
+        //TODO: Yuck!
         Divide(out UInt128 c, ref a, ref b);
         Remainder(out remainder, ref a, ref b);
         return c;
+    }
+
+    public static (UInt128 Quotient, UInt128 Remainder) DivRem(UInt128 a, UInt128 b)
+    {
+        UInt128 quotient = DivRem(a, b, out UInt128 remainder);
+        return (quotient, remainder);
     }
 
     public static UInt128 ModAdd(UInt128 a, UInt128 b, UInt128 modulus)
@@ -2099,4 +2173,5 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         Reduce(out UInt128 w, ref t, ref n, k0);
         return w;
     }
+
 }

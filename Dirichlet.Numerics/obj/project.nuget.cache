@@ -1,12 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "oWYYEh6n6gK2cVJdJlT56A67wnH4PYEJ3z5Z9Bni51q64IubQSfL38Uap9GZXoO8Cf04o02GNAX24Q9eDdeCKg==",
+  "dgSpecHash": "FxXPqYHnnkGrwGVZII/8jEg5qQzrhOzTmYRGi/sgLy60BDbCFT4izQRLZesLfFi5+o/DzcZ6gaw6VZkYuR1mwA==",
   "success": true,
   "projectFilePath": "C:\\Users\\frebakke\\source\\repos\\dirichlet-numerics\\Dirichlet.Numerics\\Dirichlet.Numerics.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\frebakke\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.0\\microsoft.aspnetcore.app.ref.6.0.0.nupkg.sha512",
-    "C:\\Users\\frebakke\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.0\\microsoft.windowsdesktop.app.ref.6.0.0.nupkg.sha512",
-    "C:\\Users\\frebakke\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.0\\microsoft.netcore.app.ref.6.0.0.nupkg.sha512"
+    "C:\\Users\\frebakke\\.nuget\\packages\\system.runtime.experimental\\7.0.0-preview.1.22076.8\\system.runtime.experimental.7.0.0-preview.1.22076.8.nupkg.sha512"
   ],
   "logs": []
 }

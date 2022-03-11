@@ -1,43 +1,21 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 
 namespace Dirichlet.Numerics;
 
-public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatable<Int128>
+public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatable<Int128>, ISignedNumber<Int128>
 {
     private UInt128 v;
 
     public static Int128 MinValue { get; } = (Int128)((UInt128)1 << 127);
     public static Int128 MaxValue { get; } = (Int128)(((UInt128)1 << 127) - 1);
+    public static Int128 AdditiveIdentity { get; } = (Int128)0;
+    public static Int128 MultiplicativeIdentity { get; } = (Int128)1;
     public static Int128 Zero { get; } = (Int128)0;
     public static Int128 One { get; } = (Int128)1;
-    public static Int128 MinusOne { get; } = (Int128)(-1);
-
-    public static Int128 Parse(string value) => TryParse(value, out Int128 c) ? c : throw new FormatException();
-
-    public static bool TryParse(string value, out Int128 result) => TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
-
-    public static bool TryParse(string value, NumberStyles style, IFormatProvider format, out Int128 result)
-    {
-        if (!BigInteger.TryParse(value, style, format, out BigInteger a))
-        {
-            result = Zero;
-            return false;
-        }
-        UInt128.Create(out result.v, a);
-        return true;
-    }
-
-    public Int128(long value) => UInt128.Create(out v, value);
-
-    public Int128(ulong value) => UInt128.Create(out v, value);
-
-    public Int128(double value) => UInt128.Create(out v, value);
-
-    public Int128(decimal value) => UInt128.Create(out v, value);
-
-    public Int128(BigInteger value) => UInt128.Create(out v, value);
+    public static Int128 NegativeOne { get; } = (Int128)(-1);
 
     public ulong S0 => v.S0;
     public ulong S1 => v.S1;
@@ -48,14 +26,65 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     public bool IsEven => v.IsEven;
     public bool IsNegative => v.S1 > long.MaxValue;
     public int Sign => IsNegative ? -1 : v.Sign;
+    static Int128 INumber<Int128>.Sign(Int128 value) => (Int128)value.Sign;
+
 
     public override string ToString() => ((BigInteger)this).ToString();
-
     public string ToString(string format) => ((BigInteger)this).ToString(format);
-
     public string ToString(IFormatProvider provider) => ToString(null, provider);
-
     public string ToString(string? format, IFormatProvider? provider) => ((BigInteger)this).ToString(format, provider);
+    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => ((BigInteger)this).TryFormat(destination, out charsWritten, format, provider);
+
+
+    #region Parsing
+    public static Int128 Parse(string? value) => TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out Int128 c) ? c : throw new FormatException();
+    public static Int128 Parse(string? value, IFormatProvider? format) => TryParse(value, NumberStyles.Integer, format, out Int128 c) ? c : throw new FormatException();
+    public static Int128 Parse(string? value, NumberStyles style, IFormatProvider? format) => TryParse(value, style, format, out Int128 c) ? c : throw new FormatException();
+    public static Int128 Parse(ReadOnlySpan<char> value, IFormatProvider? format) => TryParse(value, NumberStyles.Integer, format, out Int128 c) ? c : throw new FormatException();
+    public static Int128 Parse(ReadOnlySpan<char> value, NumberStyles style, IFormatProvider? format) => TryParse(value, style, format, out Int128 c) ? c : throw new FormatException();
+
+    public static bool TryParse([NotNullWhen(true)] string? value, out Int128 result) => TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+    public static bool TryParse([NotNullWhen(true)] string? value, IFormatProvider? format, out Int128 result) => TryParse(value, NumberStyles.Integer, format, out result);
+    public static bool TryParse([NotNullWhen(true)] string? value, NumberStyles style, IFormatProvider? format, out Int128 result)
+    {
+        if (BigInteger.TryParse(value, style, format, out BigInteger a))
+        {
+            UInt128.Create(out result.v, a);
+            return true;
+        }
+        result = Zero;
+        return false;
+    }
+
+    public static bool TryParse(ReadOnlySpan<char> value, IFormatProvider? format, out Int128 result) => TryParse(value, NumberStyles.Integer, format, out result);
+    public static bool TryParse(ReadOnlySpan<char> value, NumberStyles style, IFormatProvider? format, out Int128 result)
+    {
+        if (BigInteger.TryParse(value, style, format, out BigInteger a))
+        {
+            UInt128.Create(out result.v, a);
+            return true;
+        }
+        result = Zero;
+        return false;
+    }
+    #endregion Parsing
+
+
+    public Int128(long value) => UInt128.Create(out v, value);
+    public Int128(ulong value) => UInt128.Create(out v, value);
+    public Int128(double value) => UInt128.Create(out v, value);
+    public Int128(decimal value) => UInt128.Create(out v, value);
+    public Int128(BigInteger value) => UInt128.Create(out v, value);
+
+
+    public static Int128 Create<TOther>(TOther value) where TOther : INumber<TOther> => new() { v = UInt128.Create(value) };
+    public static bool TryCreate<TOther>(TOther value, out Int128 result) where TOther : INumber<TOther> => UInt128.TryCreate(value, out result.v);
+
+    //TODO
+    public static Int128 CreateSaturating<TOther>(TOther value) where TOther : INumber<TOther> => throw new NotImplementedException();
+    //TODO
+    public static Int128 CreateTruncating<TOther>(TOther value) where TOther : INumber<TOther> => throw new NotImplementedException();
+
 
     public static explicit operator Int128(double a)
     {
@@ -1051,6 +1080,8 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
     public static Int128 Max(Int128 a, Int128 b) => LessThan(ref b.v, ref a.v) ? a : b;
 
+    public static Int128 Clamp(Int128 a, Int128 min, Int128 max) => LessThan(ref a.v, ref min.v) ? min : (LessThan(ref max.v, ref a.v) ? max : a);
+
     public static double Log(Int128 a) => Log(a, Math.E);
 
     public static double Log10(Int128 a) => Log(a, 10);
@@ -1093,9 +1124,16 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
     public static Int128 DivRem(Int128 a, Int128 b, out Int128 remainder)
     {
+        //TODO: Yuck!
         Divide(out Int128 c, ref a, ref b);
         Remainder(out remainder, ref a, ref b);
         return c;
+    }
+
+    public static (Int128 Quotient, Int128 Remainder) DivRem(Int128 a, Int128 b)
+    {
+        Int128 quotient = DivRem(a, b, out Int128 remainder);
+        return (quotient, remainder);
     }
 
     public static Int128 Negate(Int128 a)
@@ -1179,4 +1217,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         UInt128.ModPow(out result.v, ref value.v, ref exponent.v, ref modulus.v);
         return result;
     }
+
+
+
 }
