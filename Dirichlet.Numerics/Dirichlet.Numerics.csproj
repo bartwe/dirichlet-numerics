@@ -18,16 +18,15 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Platforms>AnyCPU</Platforms>
 		<WarningsAsErrors>;NU1605;8602;8625;8600;8604;8618</WarningsAsErrors>
+		<CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<Optimize>false</Optimize>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
 		<DefineConstants></DefineConstants>
 		<Optimize>true</Optimize>
 	</PropertyGroup>
