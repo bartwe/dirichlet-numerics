@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
@@ -26,7 +27,8 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     public bool IsEven => v.IsEven;
     public bool IsNegative => v.S1 > long.MaxValue;
     public int Sign => IsNegative ? -1 : v.Sign;
-    static Int128 INumber<Int128>.Sign(Int128 value) => (Int128)value.Sign;
+  //  static
+    Int128 INumber<Int128>.Sign(Int128 value) => (Int128)value.Sign;
 
 
     public override string ToString() => ((BigInteger)this).ToString();
@@ -37,11 +39,11 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
 
     #region Parsing
-    public static Int128 Parse(string? value) => TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out Int128 c) ? c : throw new FormatException();
-    public static Int128 Parse(string? value, IFormatProvider? format) => TryParse(value, NumberStyles.Integer, format, out Int128 c) ? c : throw new FormatException();
-    public static Int128 Parse(string? value, NumberStyles style, IFormatProvider? format) => TryParse(value, style, format, out Int128 c) ? c : throw new FormatException();
-    public static Int128 Parse(ReadOnlySpan<char> value, IFormatProvider? format) => TryParse(value, NumberStyles.Integer, format, out Int128 c) ? c : throw new FormatException();
-    public static Int128 Parse(ReadOnlySpan<char> value, NumberStyles style, IFormatProvider? format) => TryParse(value, style, format, out Int128 c) ? c : throw new FormatException();
+    public static Int128 Parse(string? value) => TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out var c) ? c : throw new FormatException();
+    public static Int128 Parse(string? value, IFormatProvider? format) => TryParse(value, NumberStyles.Integer, format, out var c) ? c : throw new FormatException();
+    public static Int128 Parse(string? value, NumberStyles style, IFormatProvider? format) => TryParse(value, style, format, out var c) ? c : throw new FormatException();
+    public static Int128 Parse(ReadOnlySpan<char> value, IFormatProvider? format) => TryParse(value, NumberStyles.Integer, format, out var c) ? c : throw new FormatException();
+    public static Int128 Parse(ReadOnlySpan<char> value, NumberStyles style, IFormatProvider? format) => TryParse(value, style, format, out var c) ? c : throw new FormatException();
 
     public static bool TryParse([NotNullWhen(true)] string? value, out Int128 result) => TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
     public static bool TryParse([NotNullWhen(true)] string? value, IFormatProvider? format, out Int128 result) => TryParse(value, NumberStyles.Integer, format, out result);
@@ -192,7 +194,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 c, ref a.v);
+            UInt128.Negate(out var c, ref a.v);
             return -(decimal)c;
         }
         return (decimal)a.v;
@@ -202,7 +204,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 c, ref a.v);
+            UInt128.Negate(out var c, ref a.v);
             return -(BigInteger)c;
         }
         return (BigInteger)a.v;
@@ -212,7 +214,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 c, ref a.v);
+            UInt128.Negate(out var c, ref a.v);
             return -UInt128.ConvertToFloat(ref c);
         }
         return UInt128.ConvertToFloat(ref a.v);
@@ -222,7 +224,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 c, ref a.v);
+            UInt128.Negate(out var c, ref a.v);
             return -UInt128.ConvertToDouble(ref c);
         }
         return UInt128.ConvertToDouble(ref a.v);
@@ -347,85 +349,85 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
     public static Int128 operator *(Int128 a, int b)
     {
-        Multiply(out Int128 c, ref a, b);
+        Multiply(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator *(int a, Int128 b)
     {
-        Multiply(out Int128 c, ref b, a);
+        Multiply(out var c, ref b, a);
         return c;
     }
 
     public static Int128 operator *(Int128 a, uint b)
     {
-        Multiply(out Int128 c, ref a, b);
+        Multiply(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator *(uint a, Int128 b)
     {
-        Multiply(out Int128 c, ref b, a);
+        Multiply(out var c, ref b, a);
         return c;
     }
 
     public static Int128 operator *(Int128 a, long b)
     {
-        Multiply(out Int128 c, ref a, b);
+        Multiply(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator *(long a, Int128 b)
     {
-        Multiply(out Int128 c, ref b, a);
+        Multiply(out var c, ref b, a);
         return c;
     }
 
     public static Int128 operator *(Int128 a, ulong b)
     {
-        Multiply(out Int128 c, ref a, b);
+        Multiply(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator *(ulong a, Int128 b)
     {
-        Multiply(out Int128 c, ref b, a);
+        Multiply(out var c, ref b, a);
         return c;
     }
 
     public static Int128 operator *(Int128 a, Int128 b)
     {
-        Multiply(out Int128 c, ref a, ref b);
+        Multiply(out var c, ref a, ref b);
         return c;
     }
 
     public static Int128 operator /(Int128 a, int b)
     {
-        Divide(out Int128 c, ref a, b);
+        Divide(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator /(Int128 a, uint b)
     {
-        Divide(out Int128 c, ref a, b);
+        Divide(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator /(Int128 a, long b)
     {
-        Divide(out Int128 c, ref a, b);
+        Divide(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator /(Int128 a, ulong b)
     {
-        Divide(out Int128 c, ref a, b);
+        Divide(out var c, ref a, b);
         return c;
     }
 
     public static Int128 operator /(Int128 a, Int128 b)
     {
-        Divide(out Int128 c, ref a, ref b);
+        Divide(out var c, ref a, ref b);
         return c;
     }
 
@@ -435,7 +437,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     public static long operator %(Int128 a, ulong b) => Remainder(ref a, b);
     public static Int128 operator %(Int128 a, Int128 b)
     {
-        Remainder(out Int128 c, ref a, ref b);
+        Remainder(out var c, ref a, ref b);
         return c;
     }
 
@@ -591,7 +593,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b < 0)
                 UInt128.Multiply(out c.v, ref aneg, (uint)(-b));
             else
@@ -617,7 +619,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             UInt128.Multiply(out c.v, ref aneg, b);
             UInt128.Negate(ref c.v);
         }
@@ -630,7 +632,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b < 0)
                 UInt128.Multiply(out c.v, ref aneg, (ulong)(-b));
             else
@@ -656,7 +658,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             UInt128.Multiply(out c.v, ref aneg, b);
             UInt128.Negate(ref c.v);
         }
@@ -669,10 +671,10 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.Multiply(out c.v, ref aneg, ref bneg);
             }
             else
@@ -685,7 +687,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         {
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.Multiply(out c.v, ref a.v, ref bneg);
                 UInt128.Negate(ref c.v);
             }
@@ -699,12 +701,12 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b < 0)
-                UInt128.Multiply(out c.v, ref aneg, (uint)(-b));
+                UInt128.Divide(out c.v, ref aneg, (uint)(-b));
             else
             {
-                UInt128.Multiply(out c.v, ref aneg, (uint)b);
+                UInt128.Divide(out c.v, ref aneg, (uint)b);
                 UInt128.Negate(ref c.v);
             }
         }
@@ -712,11 +714,11 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         {
             if (b < 0)
             {
-                UInt128.Multiply(out c.v, ref a.v, (uint)(-b));
+                UInt128.Divide(out c.v, ref a.v, (uint)(-b));
                 UInt128.Negate(ref c.v);
             }
             else
-                UInt128.Multiply(out c.v, ref a.v, (uint)b);
+                UInt128.Divide(out c.v, ref a.v, (uint)b);
         }
         Debug.Assert((BigInteger)c == (BigInteger)a / (BigInteger)b);
     }
@@ -725,7 +727,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             UInt128.Divide(out c.v, ref aneg, b);
             UInt128.Negate(ref c.v);
         }
@@ -738,7 +740,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b < 0)
                 UInt128.Divide(out c.v, ref aneg, (ulong)(-b));
             else
@@ -764,7 +766,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             UInt128.Divide(out c.v, ref aneg, b);
             UInt128.Negate(ref c.v);
         }
@@ -777,10 +779,10 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.Divide(out c.v, ref aneg, ref bneg);
             }
             else
@@ -793,7 +795,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         {
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.Divide(out c.v, ref a.v, ref bneg);
                 UInt128.Negate(ref c.v);
             }
@@ -807,7 +809,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             return b < 0 ? (int)UInt128.Remainder(ref aneg, (uint)-b) : -(int)UInt128.Remainder(ref aneg, (uint)b);
         }
         else
@@ -820,7 +822,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             return -(int)UInt128.Remainder(ref aneg, b);
         }
         else
@@ -831,7 +833,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             return b < 0 ? (long)UInt128.Remainder(ref aneg, (ulong)-b) : -(long)UInt128.Remainder(ref aneg, (ulong)b);
         }
         else
@@ -844,7 +846,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             return -(long)UInt128.Remainder(ref aneg, b);
         }
         else
@@ -855,11 +857,12 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.Remainder(out c.v, ref aneg, ref bneg);
+                UInt128.Negate(ref c.v);
             }
             else
             {
@@ -871,9 +874,8 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         {
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.Remainder(out c.v, ref a.v, ref bneg);
-                UInt128.Negate(ref c.v);
             }
             else
                 UInt128.Remainder(out c.v, ref a.v, ref b.v);
@@ -904,7 +906,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         Int128 c;
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             UInt128.Square(out c.v, ref aneg);
         }
         else
@@ -930,7 +932,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         Int128 c;
         if (a < 0)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             UInt128.Cube(out c.v, ref aneg);
             UInt128.Negate(ref c.v);
         }
@@ -967,12 +969,12 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (c < 0)
         {
-            UInt128.Multiply(out UInt128 product, ref b, (uint)-c);
+            UInt128.Multiply(out var product, ref b, (uint)-c);
             UInt128.Subtract(ref a.v, ref product);
         }
         else
         {
-            UInt128.Multiply(out UInt128 product, ref b, (uint)c);
+            UInt128.Multiply(out var product, ref b, (uint)c);
             UInt128.Add(ref a.v, ref product);
         }
     }
@@ -981,12 +983,12 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (c < 0)
         {
-            UInt128.Multiply(out UInt128 product, ref b, (ulong)-c);
+            UInt128.Multiply(out var product, ref b, (ulong)-c);
             UInt128.Subtract(ref a.v, ref product);
         }
         else
         {
-            UInt128.Multiply(out UInt128 product, ref b, (ulong)c);
+            UInt128.Multiply(out var product, ref b, (ulong)c);
             UInt128.Add(ref a.v, ref product);
         }
     }
@@ -995,12 +997,12 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (c < 0)
         {
-            UInt128.Multiply(out UInt128 d, ref b, (uint)-c);
+            UInt128.Multiply(out var d, ref b, (uint)-c);
             UInt128.Add(ref a.v, ref d);
         }
         else
         {
-            UInt128.Multiply(out UInt128 d, ref b, (uint)c);
+            UInt128.Multiply(out var d, ref b, (uint)c);
             UInt128.Subtract(ref a.v, ref d);
         }
     }
@@ -1009,12 +1011,12 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (c < 0)
         {
-            UInt128.Multiply(out UInt128 d, ref b, (ulong)-c);
+            UInt128.Multiply(out var d, ref b, (ulong)-c);
             UInt128.Add(ref a.v, ref d);
         }
         else
         {
-            UInt128.Multiply(out UInt128 d, ref b, (ulong)c);
+            UInt128.Multiply(out var d, ref b, (ulong)c);
             UInt128.Subtract(ref a.v, ref d);
         }
     }
@@ -1033,7 +1035,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             throw new ArgumentException("exponent must not be negative");
         if (value.IsNegative)
         {
-            UInt128.Negate(out UInt128 valueneg, ref value.v);
+            UInt128.Negate(out var valueneg, ref value.v);
             if ((exponent & 1) == 0)
                 UInt128.Pow(out result.v, ref valueneg, (uint)exponent);
             else
@@ -1048,7 +1050,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
     public static Int128 Pow(Int128 value, int exponent)
     {
-        Pow(out Int128 result, ref value, exponent);
+        Pow(out var result, ref value, exponent);
         return result;
     }
 
@@ -1060,7 +1062,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             return -(long)UInt128.FloorCbrt(aneg);
         }
         return (long)UInt128.FloorCbrt(a.v);
@@ -1070,7 +1072,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             return -(long)UInt128.CeilingCbrt(aneg);
         }
         return (long)UInt128.CeilingCbrt(a.v);
@@ -1106,33 +1108,33 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
     public static Int128 Multiply(Int128 a, Int128 b)
     {
-        Multiply(out Int128 c, ref a, ref b);
+        Multiply(out var c, ref a, ref b);
         return c;
     }
 
     public static Int128 Divide(Int128 a, Int128 b)
     {
-        Divide(out Int128 c, ref a, ref b);
+        Divide(out var c, ref a, ref b);
         return c;
     }
 
     public static Int128 Remainder(Int128 a, Int128 b)
     {
-        Remainder(out Int128 c, ref a, ref b);
+        Remainder(out var c, ref a, ref b);
         return c;
     }
 
     public static Int128 DivRem(Int128 a, Int128 b, out Int128 remainder)
     {
         //TODO: Yuck!
-        Divide(out Int128 c, ref a, ref b);
+        Divide(out var c, ref a, ref b);
         Remainder(out remainder, ref a, ref b);
         return c;
     }
 
     public static (Int128 Quotient, Int128 Remainder) DivRem(Int128 a, Int128 b)
     {
-        Int128 quotient = DivRem(a, b, out Int128 remainder);
+        var quotient = DivRem(a, b, out var remainder);
         return (quotient, remainder);
     }
 
@@ -1145,7 +1147,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
     public static Int128 GreatestCommonDivisor(Int128 a, Int128 b)
     {
-        GreatestCommonDivisor(out Int128 c, ref a, ref b);
+        GreatestCommonDivisor(out var c, ref a, ref b);
         return c;
     }
 
@@ -1153,10 +1155,10 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     {
         if (a.IsNegative)
         {
-            UInt128.Negate(out UInt128 aneg, ref a.v);
+            UInt128.Negate(out var aneg, ref a.v);
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.GreatestCommonDivisor(out c.v, ref aneg, ref bneg);
             }
             else
@@ -1166,7 +1168,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         {
             if (b.IsNegative)
             {
-                UInt128.Negate(out UInt128 bneg, ref b.v);
+                UInt128.Negate(out var bneg, ref b.v);
                 UInt128.GreatestCommonDivisor(out c.v, ref a.v, ref bneg);
             }
             else
