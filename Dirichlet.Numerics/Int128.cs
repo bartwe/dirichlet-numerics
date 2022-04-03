@@ -7,7 +7,7 @@ using System.Numerics;
 namespace Dirichlet.Numerics;
 
 public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatable<Int128>, ISignedNumber<Int128> {
-    private UInt128 _v;
+    UInt128 _v;
 
     public static Int128 MinValue { get; } = (Int128)((UInt128)1 << 127);
     public static Int128 MaxValue { get; } = (Int128)(((UInt128)1 << 127) - 1);
@@ -50,13 +50,15 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return ((BigInteger)this).ToString(format, provider);
     }
 
-    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format,
-        IFormatProvider? provider) {
+    public bool TryFormat(
+        Span<char> destination, out int charsWritten, ReadOnlySpan<char> format,
+        IFormatProvider? provider
+    ) {
         return ((BigInteger)this).TryFormat(destination, out charsWritten, format, provider);
     }
 
 
-    #region Parsing
+#region Parsing
 
     public static Int128 Parse(string? value) {
         return TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out var c)
@@ -88,8 +90,10 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return TryParse(value, NumberStyles.Integer, format, out result);
     }
 
-    public static bool TryParse([NotNullWhen(true)] string? value, NumberStyles style, IFormatProvider? format,
-        out Int128 result) {
+    public static bool TryParse(
+        [NotNullWhen(true)] string? value, NumberStyles style, IFormatProvider? format,
+        out Int128 result
+    ) {
         if (BigInteger.TryParse(value, style, format, out var a)) {
             UInt128.Create(out result._v, a);
             return true;
@@ -103,8 +107,10 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return TryParse(value, NumberStyles.Integer, format, out result);
     }
 
-    public static bool TryParse(ReadOnlySpan<char> value, NumberStyles style, IFormatProvider? format,
-        out Int128 result) {
+    public static bool TryParse(
+        ReadOnlySpan<char> value, NumberStyles style, IFormatProvider? format,
+        out Int128 result
+    ) {
         if (BigInteger.TryParse(value, style, format, out var a)) {
             UInt128.Create(out result._v, a);
             return true;
@@ -114,7 +120,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return false;
     }
 
-    #endregion Parsing
+#endregion Parsing
 
 
     public Int128(long value) {
@@ -139,7 +145,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
 
     public static Int128 Create<TOther>(TOther value) where TOther : INumber<TOther> {
-        return new Int128 {_v = UInt128.Create(value)};
+        return new() { _v = UInt128.Create(value) };
     }
 
     public static bool TryCreate<TOther>(TOther value, out Int128 result) where TOther : INumber<TOther> {
@@ -505,7 +511,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return c;
     }
 
-    #region Comparison operators
+#region Comparison operators
 
     public static bool operator <(Int128 a, UInt128 b) {
         return a.CompareTo(b) < 0;
@@ -771,7 +777,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return !b.Equals(a);
     }
 
-    #endregion Comparison operators
+#endregion Comparison operators
 
     public int CompareTo(UInt128 other) {
         return IsNegative ? -1 : _v.CompareTo(other);
@@ -801,39 +807,39 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return obj switch {
             null => 1,
             Int128 => CompareTo((Int128)obj),
-            _ => throw new ArgumentException(null, nameof(obj))
+            _ => throw new ArgumentException(null, nameof(obj)),
         };
     }
 
-    private static bool LessThan(ref UInt128 a, ref UInt128 b) {
+    static bool LessThan(ref UInt128 a, ref UInt128 b) {
         var as1 = (long)a._s1;
         var bs1 = (long)b._s1;
         return as1 != bs1 ? as1 < bs1 : a._s0 < b._s0;
     }
 
-    private static bool LessThan(ref UInt128 a, long b) {
+    static bool LessThan(ref UInt128 a, long b) {
         var as1 = (long)a._s1;
         var bs1 = b >> 63;
         return as1 != bs1 ? as1 < bs1 : a._s0 < (ulong)b;
     }
 
-    private static bool LessThan(long a, ref UInt128 b) {
+    static bool LessThan(long a, ref UInt128 b) {
         var as1 = a >> 63;
         var bs1 = (long)b._s1;
         return as1 != bs1 ? as1 < bs1 : (ulong)a < b._s0;
     }
 
-    private static bool LessThan(ref UInt128 a, ulong b) {
+    static bool LessThan(ref UInt128 a, ulong b) {
         var as1 = (long)a._s1;
         return as1 != 0 ? as1 < 0 : a._s0 < b;
     }
 
-    private static bool LessThan(ulong a, ref UInt128 b) {
+    static bool LessThan(ulong a, ref UInt128 b) {
         var bs1 = (long)b._s1;
         return 0 != bs1 ? 0 < bs1 : a < b._s0;
     }
 
-    private static int SignedCompare(ref UInt128 a, ulong bs0, ulong bs1) {
+    static int SignedCompare(ref UInt128 a, ulong bs0, ulong bs1) {
         var as1 = a._s1;
         return as1 != bs1 ? ((long)as1).CompareTo((long)bs1) : a._s0.CompareTo(bs0);
     }
@@ -848,22 +854,22 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
 
     public bool Equals(int other) {
         if (other < 0)
-            return _v._s1 == ulong.MaxValue && _v._s0 == (uint)other;
-        return _v._s1 == 0 && _v._s0 == (uint)other;
+            return (_v._s1 == ulong.MaxValue) && (_v._s0 == (uint)other);
+        return (_v._s1 == 0) && (_v._s0 == (uint)other);
     }
 
     public bool Equals(uint other) {
-        return _v._s1 == 0 && _v._s0 == other;
+        return (_v._s1 == 0) && (_v._s0 == other);
     }
 
     public bool Equals(long other) {
         if (other < 0)
-            return _v._s1 == ulong.MaxValue && _v._s0 == (ulong)other;
-        return _v._s1 == 0 && _v._s0 == (ulong)other;
+            return (_v._s1 == ulong.MaxValue) && (_v._s0 == (ulong)other);
+        return (_v._s1 == 0) && (_v._s0 == (ulong)other);
     }
 
     public bool Equals(ulong other) {
-        return _v._s1 == 0 && _v._s0 == other;
+        return (_v._s1 == 0) && (_v._s0 == other);
     }
 
     public override bool Equals(object? obj) {
@@ -895,7 +901,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             }
         }
 
-        Debug.Assert(c == a * (BigInteger)b);
+        Debug.Assert(c == (a * (BigInteger)b));
     }
 
     public static void Multiply(out Int128 c, ref Int128 a, uint b) {
@@ -908,7 +914,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             UInt128.Multiply(out c._v, ref a._v, b);
         }
 
-        Debug.Assert(c == a * (BigInteger)b);
+        Debug.Assert(c == (a * (BigInteger)b));
     }
 
     public static void Multiply(out Int128 c, ref Int128 a, long b) {
@@ -932,7 +938,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             }
         }
 
-        Debug.Assert(c == a * (BigInteger)b);
+        Debug.Assert(c == (a * (BigInteger)b));
     }
 
     public static void Multiply(out Int128 c, ref Int128 a, ulong b) {
@@ -945,7 +951,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             UInt128.Multiply(out c._v, ref a._v, b);
         }
 
-        Debug.Assert(c == a * (BigInteger)b);
+        Debug.Assert(c == (a * (BigInteger)b));
     }
 
     public static void Multiply(out Int128 c, ref Int128 a, ref Int128 b) {
@@ -971,7 +977,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             }
         }
 
-        Debug.Assert(c == a * (BigInteger)b);
+        Debug.Assert(c == (a * (BigInteger)b));
     }
 
     public static void Divide(out Int128 c, ref Int128 a, int b) {
@@ -995,7 +1001,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             }
         }
 
-        Debug.Assert(c == a / (BigInteger)b);
+        Debug.Assert(c == (a / (BigInteger)b));
     }
 
     public static void Divide(out Int128 c, ref Int128 a, uint b) {
@@ -1008,7 +1014,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             UInt128.Divide(out c._v, ref a._v, b);
         }
 
-        Debug.Assert(c == a / (BigInteger)b);
+        Debug.Assert(c == (a / (BigInteger)b));
     }
 
     public static void Divide(out Int128 c, ref Int128 a, long b) {
@@ -1032,7 +1038,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             }
         }
 
-        Debug.Assert(c == a / (BigInteger)b);
+        Debug.Assert(c == (a / (BigInteger)b));
     }
 
     public static void Divide(out Int128 c, ref Int128 a, ulong b) {
@@ -1045,7 +1051,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             UInt128.Divide(out c._v, ref a._v, b);
         }
 
-        Debug.Assert(c == a / (BigInteger)b);
+        Debug.Assert(c == (a / (BigInteger)b));
     }
 
     public static void Divide(out Int128 c, ref Int128 a, ref Int128 b) {
@@ -1071,7 +1077,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             }
         }
 
-        Debug.Assert(c == a / (BigInteger)b);
+        Debug.Assert(c == (a / (BigInteger)b));
     }
 
     public static int Remainder(ref Int128 a, int b) {
@@ -1133,7 +1139,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
             }
         }
 
-        Debug.Assert(c == a % (BigInteger)b);
+        Debug.Assert(c == (a % (BigInteger)b));
     }
 
     public static Int128 Abs(Int128 a) {

@@ -8,7 +8,7 @@ using System.Numerics;
 namespace Dirichlet.Numerics;
 
 public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquatable<UInt128>, IUnsignedNumber<UInt128> {
-    private struct UInt256 {
+    struct UInt256 {
         public ulong S0;
         public ulong S1;
         public ulong S2;
@@ -54,16 +54,16 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
     public static UInt128 Zero { get; } = (UInt128)0;
     public static UInt128 One { get; } = (UInt128)1;
 
-    private uint R0 => (uint)_s0;
-    private uint R1 => (uint)(_s0 >> 32);
-    private uint R2 => (uint)_s1;
-    private uint R3 => (uint)(_s1 >> 32);
+    uint R0 => (uint)_s0;
+    uint R1 => (uint)(_s0 >> 32);
+    uint R2 => (uint)_s1;
+    uint R3 => (uint)(_s1 >> 32);
 
     //  public ulong _s0 => _s0;
     //  public ulong _s1 => _s1;
 
     public bool IsZero => (_s0 | _s1) == 0;
-    public bool IsOne => _s1 == 0 && _s0 == 1;
+    public bool IsOne => (_s1 == 0) && (_s0 == 1);
     public bool IsPowerOfTwo => (this & (this - 1)).IsZero;
     public bool IsEven => (_s0 & 1) == 0;
     public int Sign => IsZero ? 0 : 1;
@@ -89,15 +89,17 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return ((BigInteger)this).ToString(format, provider);
     }
 
-    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format,
-        IFormatProvider? provider) {
+    public bool TryFormat(
+        Span<char> destination, out int charsWritten, ReadOnlySpan<char> format,
+        IFormatProvider? provider
+    ) {
         return ((BigInteger)this).TryFormat(destination, out charsWritten, format, provider);
     }
 
 
-    #region Parsing
+#region Parsing
 
-    private const NumberStyles _StyleUnsignedInteger = NumberStyles.Integer & ~NumberStyles.AllowLeadingSign;
+    const NumberStyles _StyleUnsignedInteger = NumberStyles.Integer & ~NumberStyles.AllowLeadingSign;
 
     public static UInt128 Parse(string s) {
         return TryParse(s, _StyleUnsignedInteger, NumberFormatInfo.CurrentInfo, out var c)
@@ -129,8 +131,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return TryParse(s, _StyleUnsignedInteger, provider, out result);
     }
 
-    public static bool TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider,
-        out UInt128 result) {
+    public static bool TryParse(
+        [NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider,
+        out UInt128 result
+    ) {
         if (BigInteger.TryParse(s, style, provider, out var a)) {
             Create(out result, a);
             return true;
@@ -144,8 +148,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return TryParse(s, _StyleUnsignedInteger, provider, out result);
     }
 
-    public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider,
-        out UInt128 result) {
+    public static bool TryParse(
+        ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider,
+        out UInt128 result
+    ) {
         if (BigInteger.TryParse(s, style, provider, out var a)) {
             Create(out result, a);
             return true;
@@ -155,10 +161,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return false;
     }
 
-    #endregion Parsing
+#endregion Parsing
 
 
-    #region Creation and Casting
+#region Creation and Casting
 
     public UInt128(long value) {
         Create(out this, value);
@@ -255,20 +261,20 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         }
 
         result = value switch {
-            long a => new UInt128(a),
-            ulong a => new UInt128(a),
-            double a => new UInt128(a),
-            decimal a => new UInt128(a),
-            BigInteger a => new UInt128(a),
-            Int128 a => new UInt128(a),
-            float a => new UInt128(a),
-            int a => new UInt128(a),
-            uint a => new UInt128(a),
-            short a => new UInt128(a),
-            ushort a => new UInt128(a),
-            char a => new UInt128(a),
-            byte a => new UInt128(a),
-            _ => Fail()
+            long a => new(a),
+            ulong a => new(a),
+            double a => new(a),
+            decimal a => new(a),
+            BigInteger a => new(a),
+            Int128 a => new(a),
+            float a => new(a),
+            int a => new(a),
+            uint a => new(a),
+            short a => new(a),
+            ushort a => new(a),
+            char a => new(a),
+            byte a => new(a),
+            _ => Fail(),
         };
         return success;
     }
@@ -393,14 +399,14 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         var shift = Math.Max(0, 32 - GetBitLength(a._s1));
 
         RightShift(out _, ref a, shift);
-        return new decimal((int)a.R0, (int)a.R1, (int)a.R2, false, (byte)shift);
+        return new((int)a.R0, (int)a.R1, (int)a.R2, false, (byte)shift);
     }
 
     public static implicit operator BigInteger(UInt128 a) {
         return a._s1 == 0 ? a._s0 : ((BigInteger)a._s1 << 64) | a._s0;
     }
 
-    #endregion Creation and Casting
+#endregion Creation and Casting
 
 
     public static UInt128 operator <<(UInt128 a, int b) {
@@ -546,7 +552,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return c;
     }
 
-    #region Comparison operators
+#region Comparison operators
 
     public static bool operator <(UInt128 a, UInt128 b) {
         return LessThan(ref a, ref b);
@@ -764,14 +770,14 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return !b.Equals(a);
     }
 
-    #endregion
+#endregion
 
     public int CompareTo(UInt128 other) {
         return _s1 != other._s1 ? _s1.CompareTo(other._s1) : _s0.CompareTo(other._s0);
     }
 
     public int CompareTo(int other) {
-        return _s1 != 0 || other < 0 ? 1 : _s0.CompareTo((ulong)other);
+        return (_s1 != 0) || (other < 0) ? 1 : _s0.CompareTo((ulong)other);
     }
 
     public int CompareTo(uint other) {
@@ -779,7 +785,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
     }
 
     public int CompareTo(long other) {
-        return _s1 != 0 || other < 0 ? 1 : _s0.CompareTo((ulong)other);
+        return (_s1 != 0) || (other < 0) ? 1 : _s0.CompareTo((ulong)other);
     }
 
     public int CompareTo(ulong other) {
@@ -790,52 +796,52 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return obj switch {
             null => 1,
             UInt128 => CompareTo((UInt128)obj),
-            _ => throw new ArgumentException(null, nameof(obj))
+            _ => throw new ArgumentException(null, nameof(obj)),
         };
     }
 
-    private static bool LessThan(ref UInt128 a, long b) {
-        return b >= 0 && a._s1 == 0 && a._s0 < (ulong)b;
+    static bool LessThan(ref UInt128 a, long b) {
+        return (b >= 0) && (a._s1 == 0) && (a._s0 < (ulong)b);
     }
 
-    private static bool LessThan(long a, ref UInt128 b) {
-        return a < 0 || b._s1 != 0 || (ulong)a < b._s0;
+    static bool LessThan(long a, ref UInt128 b) {
+        return (a < 0) || (b._s1 != 0) || ((ulong)a < b._s0);
     }
 
-    private static bool LessThan(ref UInt128 a, ulong b) {
-        return a._s1 == 0 && a._s0 < b;
+    static bool LessThan(ref UInt128 a, ulong b) {
+        return (a._s1 == 0) && (a._s0 < b);
     }
 
-    private static bool LessThan(ulong a, ref UInt128 b) {
-        return b._s1 != 0 || a < b._s0;
+    static bool LessThan(ulong a, ref UInt128 b) {
+        return (b._s1 != 0) || (a < b._s0);
     }
 
-    private static bool LessThan(ref UInt128 a, ref UInt128 b) {
+    static bool LessThan(ref UInt128 a, ref UInt128 b) {
         return a._s1 != b._s1 ? a._s1 < b._s1 : a._s0 < b._s0;
     }
 
     public static bool Equals(ref UInt128 a, ref UInt128 b) {
-        return a._s0 == b._s0 && a._s1 == b._s1;
+        return (a._s0 == b._s0) && (a._s1 == b._s1);
     }
 
     public bool Equals(UInt128 other) {
-        return _s0 == other._s0 && _s1 == other._s1;
+        return (_s0 == other._s0) && (_s1 == other._s1);
     }
 
     public bool Equals(int other) {
-        return other >= 0 && _s0 == (uint)other && _s1 == 0;
+        return (other >= 0) && (_s0 == (uint)other) && (_s1 == 0);
     }
 
     public bool Equals(uint other) {
-        return _s0 == other && _s1 == 0;
+        return (_s0 == other) && (_s1 == 0);
     }
 
     public bool Equals(long other) {
-        return other >= 0 && _s0 == (ulong)other && _s1 == 0;
+        return (other >= 0) && (_s0 == (ulong)other) && (_s1 == 0);
     }
 
     public bool Equals(ulong other) {
-        return _s0 == other && _s1 == 0;
+        return (_s0 == other) && (_s1 == 0);
     }
 
     public override bool Equals(object? obj) {
@@ -848,7 +854,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
 
     public static void Multiply(out UInt128 c, ulong a, ulong b) {
         Multiply64(out c, a, b);
-        Debug.Assert(c == a * (BigInteger)b);
+        Debug.Assert(c == (a * (BigInteger)b));
     }
 
     public static void Multiply(out UInt128 c, ref UInt128 a, uint b) {
@@ -856,7 +862,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             Multiply64(out c, a._s0, b);
         else
             Multiply128(out c, ref a, b);
-        Debug.Assert(c == a * (BigInteger)b % ((BigInteger)1 << 128));
+        Debug.Assert(c == ((a * (BigInteger)b) % ((BigInteger)1 << 128)));
     }
 
     public static void Multiply(out UInt128 c, ref UInt128 a, ulong b) {
@@ -864,7 +870,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             Multiply64(out c, a._s0, b);
         else
             Multiply128(out c, ref a, b);
-        Debug.Assert(c == a * (BigInteger)b % ((BigInteger)1 << 128));
+        Debug.Assert(c == ((a * (BigInteger)b) % ((BigInteger)1 << 128)));
     }
 
     public static void Multiply(out UInt128 c, ref UInt128 a, ref UInt128 b) {
@@ -876,10 +882,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             Multiply128(out c, ref a, b._s0);
         else
             Multiply128(out c, ref a, ref b);
-        Debug.Assert(c == a * (BigInteger)b % ((BigInteger)1 << 128));
+        Debug.Assert(c == ((a * (BigInteger)b) % ((BigInteger)1 << 128)));
     }
 
-    private static void Multiply(out UInt256 c, ref UInt128 a, ref UInt128 b) {
+    static void Multiply(out UInt256 c, ref UInt128 a, ref UInt128 b) {
         Multiply64(out var c00, a._s0, b._s0);
         Multiply64(out var c01, a._s0, b._s1);
         Multiply64(out var c10, a._s1, b._s0);
@@ -890,7 +896,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         c.S1 = Add(Add(c00._s1, c01._s0, ref carry1), c10._s0, ref carry1);
         c.S2 = Add(Add(Add(c01._s1, c10._s1, ref carry2), c11._s0, ref carry2), carry1, ref carry2);
         c.S3 = c11._s1 + carry2;
-        Debug.Assert(c == a * (BigInteger)b);
+        Debug.Assert(c == (a * (BigInteger)b));
     }
 
     public static UInt128 Abs(UInt128 a) {
@@ -947,44 +953,44 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
     public static void Add(out UInt128 c, ulong a, ulong b) {
         c._s0 = a + b;
         c._s1 = 0;
-        if (c._s0 < a && c._s0 < b)
+        if ((c._s0 < a) && (c._s0 < b))
             ++c._s1;
-        Debug.Assert(c == a + (BigInteger)b);
+        Debug.Assert(c == (a + (BigInteger)b));
     }
 
     public static void Add(out UInt128 c, ref UInt128 a, ulong b) {
         c._s0 = a._s0 + b;
         c._s1 = a._s1;
-        if (c._s0 < a._s0 && c._s0 < b)
+        if ((c._s0 < a._s0) && (c._s0 < b))
             ++c._s1;
-        Debug.Assert(c == (a + (BigInteger)b) % ((BigInteger)1 << 128));
+        Debug.Assert(c == ((a + (BigInteger)b) % ((BigInteger)1 << 128)));
     }
 
     public static void Add(out UInt128 c, ref UInt128 a, ref UInt128 b) {
         c._s0 = a._s0 + b._s0;
         c._s1 = a._s1 + b._s1;
-        if (c._s0 < a._s0 && c._s0 < b._s0)
+        if ((c._s0 < a._s0) && (c._s0 < b._s0))
             ++c._s1;
-        Debug.Assert(c == (a + (BigInteger)b) % ((BigInteger)1 << 128));
+        Debug.Assert(c == ((a + (BigInteger)b) % ((BigInteger)1 << 128)));
     }
 
-    private static ulong Add(ulong a, ulong b, ref uint carry) {
+    static ulong Add(ulong a, ulong b, ref uint carry) {
         var c = a + b;
-        if (c < a && c < b)
+        if ((c < a) && (c < b))
             ++carry;
         return c;
     }
 
     public static void Add(ref UInt128 a, ulong b) {
         var sum = a._s0 + b;
-        if (sum < a._s0 && sum < b)
+        if ((sum < a._s0) && (sum < b))
             ++a._s1;
         a._s0 = sum;
     }
 
     public static void Add(ref UInt128 a, ref UInt128 b) {
         var sum = a._s0 + b._s0;
-        if (sum < a._s0 && sum < b._s0)
+        if ((sum < a._s0) && (sum < b._s0))
             ++a._s1;
         a._s0 = sum;
         a._s1 += b._s1;
@@ -999,7 +1005,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         c._s1 = a._s1;
         if (a._s0 < b)
             --c._s1;
-        Debug.Assert(c == (a - (BigInteger)b + ((BigInteger)1 << 128)) % ((BigInteger)1 << 128));
+        Debug.Assert(c == (((a - (BigInteger)b) + ((BigInteger)1 << 128)) % ((BigInteger)1 << 128)));
     }
 
     public static void Subtract(out UInt128 c, ulong a, ref UInt128 b) {
@@ -1007,7 +1013,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         c._s1 = 0 - b._s1;
         if (a < b._s0)
             --c._s1;
-        Debug.Assert(c == (a - (BigInteger)b + ((BigInteger)1 << 128)) % ((BigInteger)1 << 128));
+        Debug.Assert(c == (((a - (BigInteger)b) + ((BigInteger)1 << 128)) % ((BigInteger)1 << 128)));
     }
 
     public static void Subtract(out UInt128 c, ref UInt128 a, ref UInt128 b) {
@@ -1015,7 +1021,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         c._s1 = a._s1 - b._s1;
         if (a._s0 < b._s0)
             --c._s1;
-        Debug.Assert(c == (a - (BigInteger)b + ((BigInteger)1 << 128)) % ((BigInteger)1 << 128));
+        Debug.Assert(c == (((a - (BigInteger)b) + ((BigInteger)1 << 128)) % ((BigInteger)1 << 128)));
     }
 
     public static void Subtract(ref UInt128 a, ulong b) {
@@ -1035,7 +1041,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         Subtract(ref a, ref b);
     }
 
-    private static void Square64(out UInt128 w, ulong u) {
+    static void Square64(out UInt128 w, ulong u) {
         ulong u0 = (uint)u;
         var u1 = u >> 32;
         var carry = u0 * u0;
@@ -1046,16 +1052,16 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         carry = (uint)carry + u0U1;
         w._s0 = (carry << 32) | r0;
         w._s1 = (carry >> 32) + r2 + (u1 * u1);
-        Debug.Assert(w == (BigInteger)u * u);
+        Debug.Assert(w == ((BigInteger)u * u));
     }
 
-    private static void Multiply64(out UInt128 w, uint u, uint v) {
+    static void Multiply64(out UInt128 w, uint u, uint v) {
         w._s0 = (ulong)u * v;
         w._s1 = 0;
-        Debug.Assert(w == (BigInteger)u * v);
+        Debug.Assert(w == ((BigInteger)u * v));
     }
 
-    private static void Multiply64(out UInt128 w, ulong u, uint v) {
+    static void Multiply64(out UInt128 w, ulong u, uint v) {
         ulong u0 = (uint)u;
         var u1 = u >> 32;
         var carry = u0 * v;
@@ -1063,10 +1069,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         carry = (carry >> 32) + (u1 * v);
         w._s0 = (carry << 32) | r0;
         w._s1 = carry >> 32;
-        Debug.Assert(w == (BigInteger)u * v);
+        Debug.Assert(w == ((BigInteger)u * v));
     }
 
-    private static void Multiply64(out UInt128 w, ulong u, ulong v) {
+    static void Multiply64(out UInt128 w, ulong u, ulong v) {
         ulong u0 = (uint)u;
         var u1 = u >> 32;
         ulong v0 = (uint)v;
@@ -1078,10 +1084,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         carry = (uint)carry + (u1 * v0);
         w._s0 = (carry << 32) | r0;
         w._s1 = (carry >> 32) + r2 + (u1 * v1);
-        Debug.Assert(w == (BigInteger)u * v);
+        Debug.Assert(w == ((BigInteger)u * v));
     }
 
-    private static void Multiply64(out UInt128 w, ulong u, ulong v, ulong c) {
+    static void Multiply64(out UInt128 w, ulong u, ulong v, ulong c) {
         ulong u0 = (uint)u;
         var u1 = u >> 32;
         ulong v0 = (uint)v;
@@ -1093,10 +1099,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         carry = (uint)carry + (u1 * v0);
         w._s0 = (carry << 32) | r0;
         w._s1 = (carry >> 32) + r2 + (u1 * v1);
-        Debug.Assert(w == ((BigInteger)u * v) + c);
+        Debug.Assert(w == (((BigInteger)u * v) + c));
     }
 
-    private static ulong MultiplyHigh64(ulong u, ulong v, ulong c) {
+    static ulong MultiplyHigh64(ulong u, ulong v, ulong c) {
         ulong u0 = (uint)u;
         var u1 = u >> 32;
         ulong v0 = (uint)v;
@@ -1107,22 +1113,22 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return (carry >> 32) + r2 + (u1 * v1);
     }
 
-    private static void Multiply128(out UInt128 w, ref UInt128 u, uint v) {
+    static void Multiply128(out UInt128 w, ref UInt128 u, uint v) {
         Multiply64(out w, u._s0, v);
         w._s1 += u._s1 * v;
-        Debug.Assert(w == (BigInteger)u * v % ((BigInteger)1 << 128));
+        Debug.Assert(w == (((BigInteger)u * v) % ((BigInteger)1 << 128)));
     }
 
-    private static void Multiply128(out UInt128 w, ref UInt128 u, ulong v) {
+    static void Multiply128(out UInt128 w, ref UInt128 u, ulong v) {
         Multiply64(out w, u._s0, v);
         w._s1 += u._s1 * v;
-        Debug.Assert(w == (BigInteger)u * v % ((BigInteger)1 << 128));
+        Debug.Assert(w == (((BigInteger)u * v) % ((BigInteger)1 << 128)));
     }
 
-    private static void Multiply128(out UInt128 w, ref UInt128 u, ref UInt128 v) {
+    static void Multiply128(out UInt128 w, ref UInt128 u, ref UInt128 v) {
         Multiply64(out w, u._s0, v._s0);
         w._s1 += (u._s1 * v._s0) + (u._s0 * v._s1);
-        Debug.Assert(w == (BigInteger)u * v % ((BigInteger)1 << 128));
+        Debug.Assert(w == (((BigInteger)u * v) % ((BigInteger)1 << 128)));
     }
 
     public static void Divide(out UInt128 w, ref UInt128 u, uint v) {
@@ -1170,7 +1176,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return u._s1 switch {
             0 => (uint)(u._s0 % v),
             <= uint.MaxValue => Remainder96(ref u, v),
-            _ => Remainder128(ref u, v)
+            _ => Remainder128(ref u, v),
         };
     }
 
@@ -1201,20 +1207,20 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         Remainder(out a, ref a2, ref b);
     }
 
-    private static void Remainder(out UInt128 c, ref UInt256 a, ref UInt128 b) {
+    static void Remainder(out UInt128 c, ref UInt256 a, ref UInt128 b) {
         if (b.R3 == 0)
             Remainder192(out c, ref a, ref b);
         else
             Remainder256(out c, ref a, ref b);
     }
 
-    private static void Divide64(out UInt128 w, ulong u, ulong v) {
+    static void Divide64(out UInt128 w, ulong u, ulong v) {
         w._s1 = 0;
         w._s0 = u / v;
-        Debug.Assert(w == (BigInteger)u / v);
+        Debug.Assert(w == ((BigInteger)u / v));
     }
 
-    private static void Divide96(out UInt128 w, ref UInt128 u, uint v) {
+    static void Divide96(out UInt128 w, ref UInt128 u, uint v) {
         var r2 = u.R2;
         var w2 = r2 / v;
         ulong u0 = r2 - (w2 * v);
@@ -1225,10 +1231,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         var w0 = (uint)(u0U1 / v);
         w._s1 = w2;
         w._s0 = ((ulong)w1 << 32) | w0;
-        Debug.Assert(w == (BigInteger)u / v);
+        Debug.Assert(w == ((BigInteger)u / v));
     }
 
-    private static void Divide128(out UInt128 w, ref UInt128 u, uint v) {
+    static void Divide128(out UInt128 w, ref UInt128 u, uint v) {
         var r3 = u.R3;
         var w3 = r3 / v;
         ulong u0 = r3 - (w3 * v);
@@ -1242,10 +1248,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         var w0 = (uint)(u0U1 / v);
         w._s1 = ((ulong)w3 << 32) | w2;
         w._s0 = ((ulong)w1 << 32) | w0;
-        Debug.Assert(w == (BigInteger)u / v);
+        Debug.Assert(w == ((BigInteger)u / v));
     }
 
-    private static void Divide96(out UInt128 w, ref UInt128 u, ulong v) {
+    static void Divide96(out UInt128 w, ref UInt128 u, ulong v) {
         w._s0 = w._s1 = 0;
         var dneg = GetBitLength((uint)(v >> 32));
         var d = 32 - dneg;
@@ -1267,10 +1273,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         var q0 = DivRem(r2, ref r1, ref r0, v1, v2);
         w._s0 = ((ulong)q1 << 32) | q0;
         w._s1 = 0;
-        Debug.Assert(w == (BigInteger)u / v);
+        Debug.Assert(w == ((BigInteger)u / v));
     }
 
-    private static void Divide128(out UInt128 w, ref UInt128 u, ulong v) {
+    static void Divide128(out UInt128 w, ref UInt128 u, ulong v) {
         w._s0 = w._s1 = 0;
         var dneg = GetBitLength((uint)(v >> 32));
         var d = 32 - dneg;
@@ -1294,10 +1300,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         var q1 = DivRem(r3, ref r2, ref r1, v1, v2);
         var q0 = DivRem(r2, ref r1, ref r0, v1, v2);
         w._s0 = ((ulong)q1 << 32) | q0;
-        Debug.Assert(w == (BigInteger)u / v);
+        Debug.Assert(w == ((BigInteger)u / v));
     }
 
-    private static uint Remainder96(ref UInt128 u, uint v) {
+    static uint Remainder96(ref UInt128 u, uint v) {
         ulong u0 = u.R2 % v;
         var u0U1 = (u0 << 32) | u.R1;
         u0 = u0U1 % v;
@@ -1305,7 +1311,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return (uint)(u0U1 % v);
     }
 
-    private static uint Remainder128(ref UInt128 u, uint v) {
+    static uint Remainder128(ref UInt128 u, uint v) {
         ulong u0 = u.R3 % v;
         var u0U1 = (u0 << 32) | u.R2;
         u0 = u0U1 % v;
@@ -1315,7 +1321,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return (uint)(u0U1 % v);
     }
 
-    private static ulong Remainder96(ref UInt128 u, ulong v) {
+    static ulong Remainder96(ref UInt128 u, ulong v) {
         var dneg = GetBitLength((uint)(v >> 32));
         var d = 32 - dneg;
         var vPrime = v << d;
@@ -1337,7 +1343,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return (((ulong)r1 << 32) | r0) >> d;
     }
 
-    private static ulong Remainder128(ref UInt128 u, ulong v) {
+    static ulong Remainder128(ref UInt128 u, ulong v) {
         var dneg = GetBitLength((uint)(v >> 32));
         var d = 32 - dneg;
         var vPrime = v << d;
@@ -1362,7 +1368,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return (((ulong)r1 << 32) | r0) >> d;
     }
 
-    private static ulong DivRem96(out UInt128 rem, ref UInt128 a, ref UInt128 b) {
+    static ulong DivRem96(out UInt128 rem, ref UInt128 a, ref UInt128 b) {
         var d = 32 - GetBitLength(b.R2);
         LeftShift64(out var v, ref b, d);
         var r4 = (uint)LeftShift64(out rem, ref a, d);
@@ -1378,12 +1384,12 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         Create(out rem, r0, r1, r2, 0);
         var div = ((ulong)q1 << 32) | q0;
         RightShift64(ref rem, d);
-        Debug.Assert((BigInteger)div == a / (BigInteger)b);
-        Debug.Assert(rem == a % (BigInteger)b);
+        Debug.Assert((BigInteger)div == (a / (BigInteger)b));
+        Debug.Assert(rem == (a % (BigInteger)b));
         return div;
     }
 
-    private static uint DivRem128(out UInt128 rem, ref UInt128 a, ref UInt128 b) {
+    static uint DivRem128(out UInt128 rem, ref UInt128 a, ref UInt128 b) {
         var d = 32 - GetBitLength(b.R3);
         LeftShift64(out var v, ref b, d);
         var r4 = (uint)LeftShift64(out rem, ref a, d);
@@ -1394,12 +1400,12 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         var div = DivRem(r4, ref r3, ref r2, ref r1, ref r0, v.R3, v.R2, v.R1, v.R0);
         Create(out rem, r0, r1, r2, r3);
         RightShift64(ref rem, d);
-        Debug.Assert((BigInteger)div == a / (BigInteger)b);
-        Debug.Assert(rem == a % (BigInteger)b);
+        Debug.Assert((BigInteger)div == (a / (BigInteger)b));
+        Debug.Assert(rem == (a % (BigInteger)b));
         return div;
     }
 
-    private static void Remainder192(out UInt128 c, ref UInt256 a, ref UInt128 b) {
+    static void Remainder192(out UInt128 c, ref UInt256 a, ref UInt128 b) {
         var d = 32 - GetBitLength(b.R2);
         LeftShift64(out var v, ref b, d);
         var v1 = v.R2;
@@ -1419,10 +1425,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         DivRem(r3, ref r2, ref r1, ref r0, v1, v2, v3);
         Create(out c, r0, r1, r2, 0);
         RightShift64(ref c, d);
-        Debug.Assert(c == a % (BigInteger)b);
+        Debug.Assert(c == (a % (BigInteger)b));
     }
 
-    private static void Remainder256(out UInt128 c, ref UInt256 a, ref UInt128 b) {
+    static void Remainder256(out UInt128 c, ref UInt256 a, ref UInt128 b) {
         var d = 32 - GetBitLength(b.R3);
         LeftShift64(out var v, ref b, d);
         var v1 = v.R3;
@@ -1445,17 +1451,17 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         DivRem(r4, ref r3, ref r2, ref r1, ref r0, v1, v2, v3, v4);
         Create(out c, r0, r1, r2, r3);
         RightShift64(ref c, d);
-        Debug.Assert(c == a % (BigInteger)b);
+        Debug.Assert(c == (a % (BigInteger)b));
     }
 
-    private static ulong Q(uint u0, uint u1, uint u2, uint v1, uint v2) {
+    static ulong Q(uint u0, uint u1, uint u2, uint v1, uint v2) {
         var u0U1 = ((ulong)u0 << 32) | u1;
         var qhat = u0 == v1 ? uint.MaxValue : u0U1 / v1;
         var r = u0U1 - (qhat * v1);
-        if (r == (uint)r && v2 * qhat > ((r << 32) | u2)) {
+        if ((r == (uint)r) && ((v2 * qhat) > ((r << 32) | u2))) {
             --qhat;
             r += v1;
-            if (r == (uint)r && v2 * qhat > ((r << 32) | u2))
+            if ((r == (uint)r) && ((v2 * qhat) > ((r << 32) | u2)))
                 --qhat;
             //r += v1; //redundant
         }
@@ -1463,7 +1469,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return qhat;
     }
 
-    private static uint DivRem(uint u0, ref uint u1, ref uint u2, uint v1, uint v2) {
+    static uint DivRem(uint u0, ref uint u1, ref uint u2, uint v1, uint v2) {
         var qhat = Q(u0, u1, u2, v1, v2);
         var carry = qhat * v2;
         var borrow = (long)u2 - (uint)carry;
@@ -1488,7 +1494,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return (uint)qhat;
     }
 
-    private static uint DivRem(uint u0, ref uint u1, ref uint u2, ref uint u3, uint v1, uint v2, uint v3) {
+    static uint DivRem(uint u0, ref uint u1, ref uint u2, ref uint u3, uint v1, uint v2, uint v3) {
         var qhat = Q(u0, u1, u2, v1, v2);
         var carry = qhat * v3;
         var borrow = (long)u3 - (uint)carry;
@@ -1521,8 +1527,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return (uint)qhat;
     }
 
-    private static uint DivRem(uint u0, ref uint u1, ref uint u2, ref uint u3, ref uint u4, uint v1, uint v2, uint v3,
-        uint v4) {
+    static uint DivRem(
+        uint u0, ref uint u1, ref uint u2, ref uint u3, ref uint u4, uint v1, uint v2, uint v3,
+        uint v4
+    ) {
         var qhat = Q(u0, u1, u2, v1, v2);
         var carry = qhat * v4;
         var borrow = (long)u4 - (uint)carry;
@@ -1649,7 +1657,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return a._s1 >> dneg;
     }
 
-    private static ulong LeftShift64(out UInt256 c, ref UInt256 a, int d) {
+    static ulong LeftShift64(out UInt256 c, ref UInt256 a, int d) {
         if (d == 0) {
             c = a;
             return 0;
@@ -1784,12 +1792,12 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return result;
     }
 
-    private const int _MaxRepShift = 53;
-    private static readonly ulong _MaxRep = (ulong)1 << _MaxRepShift;
-    private static readonly UInt128 _MaxRepSquaredHigh = (ulong)1 << ((2 * _MaxRepShift) - 64);
+    const int _MaxRepShift = 53;
+    static readonly ulong _MaxRep = (ulong)1 << _MaxRepShift;
+    static readonly UInt128 _MaxRepSquaredHigh = (ulong)1 << ((2 * _MaxRepShift) - 64);
 
     public static ulong FloorSqrt(UInt128 a) {
-        if (a._s1 == 0 && a._s0 <= _MaxRep)
+        if ((a._s1 == 0) && (a._s0 <= _MaxRep))
             return (ulong)Math.Sqrt(a._s0);
 
         var s = (ulong)Math.Sqrt(ConvertToDouble(ref a));
@@ -1798,19 +1806,19 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             var r = a._s0 - s2._s0;
             if (r > long.MaxValue)
                 --s;
-            else if (r - (s << 1) <= long.MaxValue)
+            else if ((r - (s << 1)) <= long.MaxValue)
                 ++s;
-            Debug.Assert((BigInteger)s * s <= a && (BigInteger)(s + 1) * (s + 1) > a);
+            Debug.Assert((((BigInteger)s * s) <= a) && (((BigInteger)(s + 1) * (s + 1)) > a));
             return s;
         }
 
         s = FloorSqrt(ref a, s);
-        Debug.Assert((BigInteger)s * s <= a && (BigInteger)(s + 1) * (s + 1) > a);
+        Debug.Assert((((BigInteger)s * s) <= a) && (((BigInteger)(s + 1) * (s + 1)) > a));
         return s;
     }
 
     public static ulong CeilingSqrt(UInt128 a) {
-        if (a._s1 == 0 && a._s0 <= _MaxRep)
+        if ((a._s1 == 0) && (a._s0 <= _MaxRep))
             return (ulong)Math.Ceiling(Math.Sqrt(a._s0));
         var s = (ulong)Math.Ceiling(Math.Sqrt(ConvertToDouble(ref a)));
         if (a._s1 < _MaxRepSquaredHigh) {
@@ -1818,21 +1826,21 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             var r = s2._s0 - a._s0;
             if (r > long.MaxValue)
                 ++s;
-            else if (r - (s << 1) <= long.MaxValue)
+            else if ((r - (s << 1)) <= long.MaxValue)
                 --s;
-            Debug.Assert((BigInteger)(s - 1) * (s - 1) < a && (BigInteger)s * s >= a);
+            Debug.Assert((((BigInteger)(s - 1) * (s - 1)) < a) && (((BigInteger)s * s) >= a));
             return s;
         }
 
         s = FloorSqrt(ref a, s);
         Square(out var square, s);
-        if (square._s0 != a._s0 || square._s1 != a._s1)
+        if ((square._s0 != a._s0) || (square._s1 != a._s1))
             ++s;
-        Debug.Assert((BigInteger)(s - 1) * (s - 1) < a && (BigInteger)s * s >= a);
+        Debug.Assert((((BigInteger)(s - 1) * (s - 1)) < a) && (((BigInteger)s * s) >= a));
         return s;
     }
 
-    private static ulong FloorSqrt(ref UInt128 a, ulong s) {
+    static ulong FloorSqrt(ref UInt128 a, ulong s) {
         ulong sprev = 0;
         while (true) {
             // Equivalent to:
@@ -1868,7 +1876,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
                 ++s;
         }
 
-        Debug.Assert((BigInteger)s * s * s <= a && (BigInteger)(s + 1) * (s + 1) * (s + 1) > a);
+        Debug.Assert((((BigInteger)s * s * s) <= a) && (((BigInteger)(s + 1) * (s + 1) * (s + 1)) > a));
         return s;
     }
 
@@ -1885,7 +1893,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
                 --s;
         }
 
-        Debug.Assert((BigInteger)(s - 1) * (s - 1) * (s - 1) < a && (BigInteger)s * s * s >= a);
+        Debug.Assert((((BigInteger)(s - 1) * (s - 1) * (s - 1)) < a) && (((BigInteger)s * s * s) >= a));
         return s;
     }
 
@@ -1981,7 +1989,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return c;
     }
 
-    private static void RightShift64(ref UInt128 c, int d) {
+    static void RightShift64(ref UInt128 c, int d) {
         if (d == 0)
             return;
         c._s0 = (c._s1 << (64 - d)) | (c._s0 >> d);
@@ -2017,7 +2025,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         c._s1 >>= 1;
     }
 
-    private static void ArithmeticRightShift64(ref UInt128 c, int d) {
+    static void ArithmeticRightShift64(ref UInt128 c, int d) {
         if (d == 0)
             return;
         c._s0 = (c._s1 << (64 - d)) | (c._s0 >> d);
@@ -2039,7 +2047,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         c._s1 = (ulong)((long)c._s1 >> 1);
     }
 
-    private static ulong LeftShift64(ref UInt128 c, int d) {
+    static ulong LeftShift64(ref UInt128 c, int d) {
         if (d == 0)
             return 0;
         var dneg = 64 - d;
@@ -2076,7 +2084,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
     public static void GreatestCommonDivisor(out UInt128 c, ref UInt128 a, ref UInt128 b) {
         // Check whether one number is > 64 bits and the other is <= 64 bits and both are non-zero.
         UInt128 a1, b1;
-        if (a._s1 == 0 == (b._s1 == 0) || a.IsZero || b.IsZero) {
+        if ((a._s1 == 0 == (b._s1 == 0)) || a.IsZero || b.IsZero) {
             a1 = a;
             b1 = b;
         }
@@ -2109,7 +2117,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
 
         // Lehmer-Euclid algorithm.
         // See: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.31.693
-        while (a1._s1 != 0 && !b.IsZero) {
+        while ((a1._s1 != 0) && !b.IsZero) {
             // Extract the high 63 bits of a and b.
             var norm = 63 - GetBitLength(a1._s1);
             Shift(out var ahat, ref a1, norm);
@@ -2145,11 +2153,11 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
                 // Apply Jebelean's termination condition
                 // to check whether q is valid.
                 if (even) {
-                    if (vhat < -x2 || uhat - vhat < y2 - y1)
+                    if ((vhat < -x2) || ((uhat - vhat) < (y2 - y1)))
                         break;
                 }
                 else {
-                    if (vhat < -y2 || uhat - vhat < x2 - x1)
+                    if ((vhat < -y2) || ((uhat - vhat) < (x2 - x1)))
                         break;
                 }
 
@@ -2161,7 +2169,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             }
 
             // Check whether a normal step is necessary.
-            if (x0 == 1 && y0 == 0) {
+            if ((x0 == 1) && (y0 == 0)) {
                 Remainder(out var rem, ref a1, ref b1);
                 a1 = b1;
                 b1 = rem;
@@ -2189,7 +2197,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
             var b2 = b1._s0;
 
             // Perform 64 bit steps.
-            while (a2 > uint.MaxValue && b2 != 0) {
+            while ((a2 > uint.MaxValue) && (b2 != 0)) {
                 var t = a2 % b2;
                 a2 = b2;
                 b2 = t;
@@ -2218,7 +2226,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         }
     }
 
-    private static void AddProducts(out UInt128 result, long x, ref UInt128 u, long y, ref UInt128 v) {
+    static void AddProducts(out UInt128 result, long x, ref UInt128 u, long y, ref UInt128 v) {
         // Compute x * u + y * v assuming y is negative and the result is positive and fits in 128 bits.
         Multiply(out var product1, ref u, (ulong)x);
         Multiply(out var product2, ref v, (ulong)-y);
@@ -2229,15 +2237,17 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return a.CompareTo(b);
     }
 
-    private static readonly byte[] _BitLength = Enumerable.Range(0, byte.MaxValue + 1)
-        .Select(value => {
-            int count;
-            for (count = 0; value != 0; count++)
-                value >>= 1;
-            return (byte)count;
-        }).ToArray();
+    static readonly byte[] _BitLength = Enumerable.Range(0, byte.MaxValue + 1)
+        .Select(
+            value => {
+                int count;
+                for (count = 0; value != 0; count++)
+                    value >>= 1;
+                return (byte)count;
+            }
+        ).ToArray();
 
-    private static int GetBitLength(uint value) {
+    static int GetBitLength(uint value) {
         var tt = value >> 16;
         if (tt != 0) {
             var t = tt >> 8;
@@ -2253,7 +2263,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         }
     }
 
-    private static int GetBitLength(ulong value) {
+    static int GetBitLength(ulong value) {
         var r1 = value >> 32;
         return r1 != 0 ? GetBitLength((uint)r1) + 32 : GetBitLength((uint)value);
     }
@@ -2291,7 +2301,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         t2 = t3 + carry._s1;
 
         Create(out w, t0, t1);
-        if (t2 != 0 || !LessThan(ref w, ref n))
+        if ((t2 != 0) || !LessThan(ref w, ref n))
             Subtract(ref w, ref n);
     }
 
@@ -2311,7 +2321,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         }
 
         Create(out w, t0, t1);
-        if (t2 != 0 || !LessThan(ref w, ref n))
+        if ((t2 != 0) || !LessThan(ref w, ref n))
             Subtract(ref w, ref n);
     }
 
