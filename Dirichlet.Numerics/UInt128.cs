@@ -1055,12 +1055,6 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         Debug.Assert(w == ((BigInteger)u * u));
     }
 
-    static void Multiply64(out UInt128 w, uint u, uint v) {
-        w._s0 = (ulong)u * v;
-        w._s1 = 0;
-        Debug.Assert(w == ((BigInteger)u * v));
-    }
-
     static void Multiply64(out UInt128 w, ulong u, uint v) {
         ulong u0 = (uint)u;
         var u1 = u >> 32;
