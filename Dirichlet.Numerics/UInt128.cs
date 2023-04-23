@@ -97,7 +97,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
     }
 
 
-#region Parsing
+    #region Parsing
 
     const NumberStyles _StyleUnsignedInteger = NumberStyles.Integer & ~NumberStyles.AllowLeadingSign;
 
@@ -161,10 +161,10 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return false;
     }
 
-#endregion Parsing
+    #endregion Parsing
 
 
-#region Creation and Casting
+    #region Creation and Casting
 
     public UInt128(long value) {
         Create(out this, value);
@@ -406,7 +406,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return a._s1 == 0 ? a._s0 : ((BigInteger)a._s1 << 64) | a._s0;
     }
 
-#endregion Creation and Casting
+    #endregion Creation and Casting
 
 
     public static UInt128 operator <<(UInt128 a, int b) {
@@ -414,7 +414,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return c;
     }
 
-    public static UInt128 operator >> (UInt128 a, int b) {
+    public static UInt128 operator >>(UInt128 a, int b) {
         RightShift(out var c, ref a, b);
         return c;
     }
@@ -552,7 +552,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return c;
     }
 
-#region Comparison operators
+    #region Comparison operators
 
     public static bool operator <(UInt128 a, UInt128 b) {
         return LessThan(ref a, ref b);
@@ -770,7 +770,7 @@ public struct UInt128 : IFormattable, IComparable, IComparable<UInt128>, IEquata
         return !b.Equals(a);
     }
 
-#endregion
+    #endregion
 
     public int CompareTo(UInt128 other) {
         return _s1 != other._s1 ? _s1.CompareTo(other._s1) : _s0.CompareTo(other._s0);

@@ -58,7 +58,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
     }
 
 
-#region Parsing
+    #region Parsing
 
     public static Int128 Parse(string? value) {
         return TryParse(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out var c)
@@ -120,7 +120,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return false;
     }
 
-#endregion Parsing
+    #endregion Parsing
 
 
     public Int128(long value) {
@@ -313,7 +313,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return c;
     }
 
-    public static Int128 operator >> (Int128 a, int b) {
+    public static Int128 operator >>(Int128 a, int b) {
         Int128 c;
         UInt128.ArithmeticRightShift(out c._v, ref a._v, b);
         return c;
@@ -511,7 +511,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return c;
     }
 
-#region Comparison operators
+    #region Comparison operators
 
     public static bool operator <(Int128 a, UInt128 b) {
         return a.CompareTo(b) < 0;
@@ -777,7 +777,7 @@ public struct Int128 : IFormattable, IComparable, IComparable<Int128>, IEquatabl
         return !b.Equals(a);
     }
 
-#endregion Comparison operators
+    #endregion Comparison operators
 
     public int CompareTo(UInt128 other) {
         return IsNegative ? -1 : _v.CompareTo(other);
